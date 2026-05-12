@@ -1,0 +1,24 @@
+# Core dependencies
+Flask==3.0.0
+Werkzeug==3.0.0
+
+# Twilio (WhatsApp API)
+twilio==8.10.0
+
+# AI/ML
+ultralytics==8.0.207
+torch==2.0.1
+torchvision==0.15.2
+torchaudio==2.0.2
+
+# Image processing
+opencv-python==4.8.0.76
+Pillow==10.0.0
+numpy==1.24.3
+
+# Utilities
+requests==2.31.0
+python-dotenv==1.0.0
+
+# Optional: For better performance
+gunicorn==21.2.0
