@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:14-alpine
+    container_name: medicuslabs-db
+    environment:
+      POSTGRES_DB: medicuslabs
+      POSTGRES_USER: medicuslabs
+      POSTGRES_PASSWORD: secure_password_change_this
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U medicuslabs"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Flask Web App
+  web:
+    build: .
+    container_name: medicuslabs-web
+    environment:
+      FLASK_ENV: development
+      DATABASE_URL: postgresql://medicuslabs:secure_password_change_this@db:5432/medicuslabs
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      EMAIL_SENDER: ${EMAIL_SENDER}
+      EMAIL_PASSWORD: ${EMAIL_PASSWORD}
+      HF_API_TOKEN: ${HF_API_TOKEN}
+      SECRET_KEY: dev_secret_key_change_in_prod
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/app
+      - uploads:/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Telegram Bot Worker (Optional)
+  bot:
+    build: .
+    container_name: medicuslabs-bot
+    environment:
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      EMAIL_SENDER: ${EMAIL_SENDER}
+      EMAIL_PASSWORD: ${EMAIL_PASSWORD}
+      HF_API_TOKEN: ${HF_API_TOKEN}
+    volumes:
+      - .:/app
+      - uploads:/app/uploads
+    command: python telegram_bot_v2.py
+    restart: unless-stopped
+    profiles:
+      - bot
+
+volumes:
+  postgres_data:
+  uploads:
+
+networks:
+  default:
+    name: medicuslabs-network

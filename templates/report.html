@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis Report - MedicusLabs</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .result-card {
+            background: #f9f9f9;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border-left: 5px solid #667eea;
+        }
+
+        .result-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .result-desc {
+            font-size: 16px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #999;
+            text-transform: uppercase;
+            margin-top: 5px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            margin-top: 25px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .recommendations {
+            list-style: none;
+        }
+
+        .recommendations li {
+            padding: 12px;
+            margin-bottom: 10px;
+            background: #f0f4ff;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            color: #333;
+            line-height: 1.5;
+        }
+
+        .urgent {
+            background: #fadbd8;
+            border-left-color: #e74c3c;
+            color: #c0392b;
+        }
+
+        .disclaimer {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 25px;
+            border-left: 4px solid #ffc107;
+        }
+
+        .disclaimer strong {
+            color: #856404;
+        }
+
+        .disclaimer p {
+            color: #856404;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .back-button {
+            display: inline-block;
+            margin-top: 25px;
+            padding: 12px 25px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: background 0.3s;
+            font-weight: 600;
+        }
+
+        .back-button:hover {
+            background: #764ba2;
+        }
+
+        .footer {
+            background: #f9f9f9;
+            padding: 20px 40px;
+            text-align: center;
+            color: #999;
+            font-size: 12px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+            
+            .container {
+                box-shadow: none;
+                border-radius: 0;
+            }
+
+            .back-button {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏥 MedicusLabs Analysis Report</h1>
+            <p>Professional Skin Disease Detection</p>
+        </div>
+
+        <div class="content">
+            <div class="result-card">
+                <div class="result-title">{{ disease_info['name'] }}</div>
+                <div class="result-desc">{{ disease_info['desc'] }}</div>
+
+                <div class="stats">
+                    <div class="stat">
+                        <div class="stat-value">{{ "%.1f"|format(report.confidence * 100) }}%</div>
+                        <div class="stat-label">Confidence</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">{{ report.created_at.strftime('%Y-%m-%d') }}</div>
+                        <div class="stat-label">Date</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">{{ report.status.upper() }}</div>
+                        <div class="stat-label">Status</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-title">💊 Medical Recommendations</div>
+            <ul class="recommendations">
+                {% for tip in disease_info['tips'] %}
+                <li>{{ tip }}</li>
+                {% endfor %}
+            </ul>
+
+            {% if report.analysis_data.get('isic_matches') %}
+            <div class="section-title">📚 Similar Cases (ISIC Database)</div>
+            <div style="background: #f0f4ff; padding: 15px; border-radius: 8px;">
+                <p>This analysis was compared against 500,000+ medical images from the ISIC Archive.</p>
+                <p style="margin-top: 10px; color: #666; font-size: 14px;">
+                    Similar cases found: {{ report.analysis_data['isic_matches']|length }}
+                </p>
+            </div>
+            {% endif %}
+
+            <div class="disclaimer">
+                <strong>⚕️ Medical Disclaimer</strong>
+                <p>
+                    This report is generated by AI analysis and is for educational and informational purposes only. 
+                    It is NOT a substitute for professional medical advice, diagnosis, or treatment. 
+                    <strong>Always consult a qualified healthcare professional</strong> for proper medical evaluation and treatment.
+                </p>
+            </div>
+
+            <a href="/dashboard" class="back-button">← Back to Dashboard</a>
+        </div>
+
+        <div class="footer">
+            <p>© 2024 MedicusLabs - AI-Powered Skin Disease Detection</p>
+            <p>For educational and research purposes only</p>
+        </div>
+    </div>
+</body>
+</html>
